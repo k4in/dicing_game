@@ -8,30 +8,36 @@ GAME RULES:
 - The first player to reach 100 points on GLOBAL score wins the game
 
 */
-var scores, roundScore, activePlayer, gamePlaying, rollCounter;
+var scores, roundScore, activePlayer, gamePlaying, rollCounter, winningScore;
 
 init();
 
 document.querySelector(".btn-roll").addEventListener("click", function() {
     if (gamePlaying) {
-        //1. Random Number
-        var dice = Math.floor(Math.random() * 6) + 1;
-
-        //2. Display the result
-        var diceDOM = document.querySelector(".dice");
-        diceDOM.style.display = "block";
-        diceDOM.src = "dice-" + dice + ".png";
-        rollCounter++;
-
-        //3. Update the round score IF the rolled number was NOT a 1
-        if (dice > 1) {
-            //Add Score
-            roundScore += dice;
-            document.querySelector("#current-" + activePlayer).textContent = roundScore + " (" + rollCounter + ")";
+        if (winningScore === undefined) {
+            document.querySelector(".warning").textContent = "Please set a winning score before you start the game!";
         } else {
-            //Next Player
-            nextPlayer();
-        } 
+
+            document.querySelector(".warning").textContent = "";
+            //1. Random Number
+            var dice = Math.floor(Math.random() * 6) + 1;
+
+            //2. Display the result
+            var diceDOM = document.querySelector(".dice");
+            diceDOM.style.display = "block";
+            diceDOM.src = "dice-" + dice + ".png";
+            rollCounter++;
+
+            //3. Update the round score IF the rolled number was NOT a 1
+            if (dice > 1) {
+                //Add Score
+                roundScore += dice;
+                document.querySelector("#current-" + activePlayer).textContent = roundScore + " (" + rollCounter + ")";
+            } else {
+                //Next Player
+                nextPlayer();
+            } 
+        }
     }
 });
 
@@ -44,7 +50,7 @@ document.querySelector(".btn-hold").addEventListener("click", function() {
         document.querySelector("#score-" + activePlayer).textContent = scores[activePlayer];
 
         //Check if player won the game
-        if(scores[activePlayer] >= 100) {
+        if(scores[activePlayer] >= winningScore) {
             document.querySelector("#name-" + activePlayer).textContent = "Winner!";
             document.querySelector(".dice").style.display = "none";
             document.querySelector(".player-" + activePlayer + "-panel").classList.add("winner");
@@ -54,6 +60,14 @@ document.querySelector(".btn-hold").addEventListener("click", function() {
             nextPlayer();
         }
     }
+});
+
+document.querySelector(".btn-score").addEventListener("click", function() {
+    winningScore = document.querySelector(".input-score").value;
+    document.querySelector(".display-score").innerHTML = "Score to win: " + winningScore;
+    document.querySelector(".display-score").style.display = "block";
+    document.querySelector(".btn-score").style.display = "none";
+    document.querySelector(".input-score").style.display = "none";
 });
 
 document.querySelector(".btn-new").addEventListener("click", init);
@@ -77,8 +91,10 @@ function init() {
     activePlayer = 0;
     roundScore = 0;
     rollCounter = 0;
+    winningScore = undefined;
 
-    document.querySelector(".dice").style.display = "none";
+    document.querySelector("#dice-1").style.display = "none";
+    document.querySelector("#dice-2").style.display = "none";
 
     document.getElementById("score-0").textContent = "0";
     document.getElementById("score-1").textContent = "0";
@@ -93,6 +109,10 @@ function init() {
     document.querySelector(".player-0-panel").classList.remove("active");
     document.querySelector(".player-1-panel").classList.remove("active");
     document.querySelector(".player-0-panel").classList.add("active");
+
+    document.querySelector(".display-score").style.display = "none";
+    document.querySelector(".btn-score").style.display = "block";
+    document.querySelector(".input-score").style.display = "block";
 
     gamePlaying = true;
 }
