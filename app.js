@@ -18,23 +18,41 @@ document.querySelector(".btn-roll").addEventListener("click", function() {
             document.querySelector(".warning").textContent = "Please set a winning score before you start the game!";
         } else {
 
-            document.querySelector(".warning").textContent = "";
             //1. Random Number
-            var dice = Math.floor(Math.random() * 6) + 1;
+            var diceValue1 = Math.floor(Math.random() * 6) + 1;
+            var diceValue2 = Math.floor(Math.random() * 6) + 1;
 
             //2. Display the result
-            var diceDOM = document.querySelector(".dice");
-            diceDOM.style.display = "block";
-            diceDOM.src = "dice-" + dice + ".png";
+            var domDice1 = document.querySelector("#dice-1");
+            var domDice2 = document.querySelector("#dice-2");
+
+            domDice1.style.display = "block";
+            domDice2.style.display = "block";
+
+            domDice1.src = "dice-" + diceValue1 + ".png";
+            domDice2.src = "dice-" + diceValue2 + ".png";
             rollCounter++;
 
             //3. Update the round score IF the rolled number was NOT a 1
-            if (dice > 1) {
-                //Add Score
-                roundScore += dice;
-                document.querySelector("#current-" + activePlayer).textContent = roundScore + " (" + rollCounter + ")";
+            if (diceValue1 > 1 && diceValue2 > 1) {
+                if (diceValue1 === diceValue2 && diceValue2 + diceValue1 < 12) {
+                    roundScore += (diceValue2 + diceValue2)*2
+                    document.querySelector("#current-" + activePlayer).textContent = roundScore + " (" + rollCounter + ")";
+                    document.querySelector(".warning").textContent = "Player " + (activePlayer+1) + " rolls " + (diceValue1 + diceValue2)*2 + " (double Points for Doublets)";
+                } else if (diceValue2 + diceValue1 === 12) {
+                    scores[activePlayer] = 0;
+                    document.querySelector("#score-" + activePlayer).textContent = scores[activePlayer];
+                    document.querySelector(".warning").textContent = "Player " + (activePlayer+1) + " rolls doublets of 6 and loses ALL Points!";
+                    nextPlayer();
+                } else {
+                    //Add Score
+                    roundScore += diceValue2 + diceValue1;
+                    document.querySelector("#current-" + activePlayer).textContent = roundScore + " (" + rollCounter + ")";
+                    document.querySelector(".warning").textContent = "Player " + (activePlayer+1) + " rolls " + (diceValue1 + diceValue2);
+                }
             } else {
                 //Next Player
+                document.querySelector(".warning").textContent = "Player " + (activePlayer+1) + " rolls a 1 and loses the points for this turn!";
                 nextPlayer();
             } 
         }
@@ -52,11 +70,14 @@ document.querySelector(".btn-hold").addEventListener("click", function() {
         //Check if player won the game
         if(scores[activePlayer] >= winningScore) {
             document.querySelector("#name-" + activePlayer).textContent = "Winner!";
-            document.querySelector(".dice").style.display = "none";
+            document.querySelector("#dice-1").style.display = "none";
+            document.querySelector("#dice-2").style.display = "none";
             document.querySelector(".player-" + activePlayer + "-panel").classList.add("winner");
             document.querySelector(".player-" + activePlayer + "-panel").classList.remove("active");
+            document.querySelector(".warning").textContent = "Player " + (activePlayer+1) + " wins the Match!";
             gamePlaying = false;
         } else {
+            document.querySelector(".warning").textContent = "Player " + (activePlayer+1) + " holds " + roundScore + " Points and finishes the turn";
             nextPlayer();
         }
     }
@@ -68,6 +89,8 @@ document.querySelector(".btn-score").addEventListener("click", function() {
     document.querySelector(".display-score").style.display = "block";
     document.querySelector(".btn-score").style.display = "none";
     document.querySelector(".input-score").style.display = "none";
+
+    document.querySelector(".warning").textContent = "";
 });
 
 document.querySelector(".btn-new").addEventListener("click", init);
@@ -92,6 +115,8 @@ function init() {
     roundScore = 0;
     rollCounter = 0;
     winningScore = undefined;
+
+    document.querySelector(".warning").textContent = "";
 
     document.querySelector("#dice-1").style.display = "none";
     document.querySelector("#dice-2").style.display = "none";
